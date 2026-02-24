@@ -23,6 +23,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       claude:  !!process.env.CLAUDE_KEY,
       tg:      !!(process.env.TG_TOKEN && process.env.TG_CHAT_ID),
+      // tg:  !!('7885491612:AAG_fF3aQwc4uqzcBdCboS_VO6ehZ6Q5pTE' && '359986040'),
       upwork:  !!(process.env.UPWORK_CLIENT_ID && process.env.UPWORK_SECRET),
       scoreAlert: parseInt(process.env.SCORE_ALERT || '95'),
     });
@@ -47,6 +48,7 @@ module.exports = async function handler(req, res) {
 
   if (action === 'test_telegram') {
     const token = process.env.TG_TOKEN, chatId = process.env.TG_CHAT_ID;
+    console.log(token);
     if (!token || !chatId) return res.status(200).json({ ok: false, error: 'TG_TOKEN or TG_CHAT_ID not set in Vercel' });
     try {
       const payload = JSON.stringify({ chat_id: chatId, text: '✅ *UpFlow* — Telegram connected!', parse_mode: 'Markdown' });
