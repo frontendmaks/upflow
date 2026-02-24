@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UpFlow — Upwork Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080a0f;--sf:#0f1219;--sf2:#171c26;--br:#1e2433;--br2:#272e42;
+  --ac:#4f7fff;--gr:#10b981;--ye:#f59e0b;--re:#ef4444;
+  --tx:#dde1f0;--tx2:#7a82a0;--tx3:#3d4460;
+  --grad:linear-gradient(135deg,#4f7fff,#6d28d9);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;display:flex}
+
+/* ── SIDEBAR ── */
+.sb{width:218px;flex-shrink:0;background:var(--sf);border-right:1px solid var(--br);display:flex;flex-direction:column;height:100vh}
+.logo{padding:20px 18px 16px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:10px}
+.logo-ico{width:30px;height:30px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-n{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-s{font-family:'DM Mono',monospace;font-size:8px;color:var(--tx3);letter-spacing:1.5px;margin-top:1px}
+.ns{padding:11px 0 2px;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.8px;color:var(--tx3);padding-left:18px;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:var(--tx2);font-size:13px;font-weight:500;transition:all .15s;user-select:none;border-left:2px solid transparent}
+.ni:hover{color:var(--tx);background:rgba(255,255,255,.025)}
+.ni.a{color:var(--ac);background:rgba(79,127,255,.07);border-left-color:var(--ac)}
+.ni .ic{font-size:13px;width:17px;text-align:center;flex-shrink:0}
+.nbadge{margin-left:auto;background:var(--gr);color:#000;font-size:9px;font-family:'DM Mono',monospace;padding:1px 6px;border-radius:10px;font-weight:700}
+.sbfoot{margin-top:auto;padding:12px 18px;border-top:1px solid var(--br);display:flex;flex-direction:column;gap:4px}
+.sv{display:flex;align-items:center;gap:8px;cursor:pointer;padding:3px 0}
+.svd{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--tx3);transition:all .3s}
+.svd.on{background:var(--gr);box-shadow:0 0 7px rgba(16,185,129,.6)}
+.svd.warn{background:var(--ye);box-shadow:0 0 6px rgba(245,158,11,.5)}
+.svl{flex:1;font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2)}
+.svt{font-family:'DM Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px}
+.svt.on{background:rgba(16,185,129,.15);color:var(--gr)}
+.svt.warn{background:rgba(245,158,11,.12);color:var(--ye)}
+.svt.off{background:rgba(61,68,96,.25);color:var(--tx3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{height:50px;border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 22px;gap:10px;background:var(--sf);flex-shrink:0}
+.tb-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex:1}
+.rfbtn{display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:7px;background:rgba(79,127,255,.1);border:1px solid rgba(79,127,255,.2);color:var(--ac);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.rfbtn:hover{background:rgba(79,127,255,.2)}
+.rfbtn.spin .ri{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tb-pill{font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(79,127,255,.1);border:1px solid rgba(79,127,255,.2);color:var(--ac)}
+
+/* ── PAGES ── */
+.pages{flex:1;overflow-y:auto;padding:20px 22px}
+.page{display:none}.page.act{display:block}
+
+/* ── LAYOUT ── */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}}
+
+/* ── STAT CARD ── */
+.sc{background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:15px 17px}
+.sl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:7px}
+.sv2{font-family:'Syne',sans-serif;font-size:25px;font-weight:800;line-height:1}
+.sv2.e{color:var(--tx3);font-size:18px}
+.ss{font-size:11px;color:var(--tx2);margin-top:3px}
+.pb{height:3px;background:var(--sf2);border-radius:2px;margin-top:8px;overflow:hidden}
+.pf{height:100%;border-radius:2px;background:var(--grad);transition:width .6s}
+
+/* ── CARD ── */
+.card{background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:16px}
+.ctit{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px}
+.div{height:1px;background:var(--br);margin:12px 0}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--tx3);padding:7px 9px;text-align:left;border-bottom:1px solid var(--br)}
+.tbl td{padding:9px 9px;font-size:12px;border-bottom:1px solid var(--br);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.012)}
+.don{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gr);box-shadow:0 0 5px var(--gr);margin-right:7px}
+.doff{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--tx3);margin-right:7px}
+.stars{color:var(--ye);font-size:11px;letter-spacing:-1px}
+
+/* ── PROFILE SCORE ── */
+.srow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.srl{font-size:11px;color:var(--tx2);width:170px;flex-shrink:0}
+.srb{flex:1;height:3px;background:var(--sf2);border-radius:2px;overflow:hidden}
+.srf{height:100%;border-radius:2px;transition:width .5s}
+.srv{font-family:'DM Mono',monospace;font-size:10px;width:30px;text-align:right}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;background:var(--sf2);border-radius:7px;padding:3px;border:1px solid var(--br);width:fit-content}
+.tab{padding:5px 14px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;color:var(--tx2);transition:all .15s;user-select:none}
+.tab.a{background:var(--sf);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.ptabs{display:flex;gap:5px;margin-bottom:10px}
+.ptab{padding:3px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--br2);color:var(--tx2);background:var(--sf2);transition:all .15s;user-select:none}
+.ptab.a{border-color:var(--ac);color:var(--ac);background:rgba(79,127,255,.08)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:7px;font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.bp{background:var(--grad);color:white}.bp:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 18px rgba(79,127,255,.3)}
+.bs{background:var(--sf2);color:var(--tx);border:1px solid var(--br2)}.bs:hover{border-color:var(--ac);color:var(--ac)}
+.bsm{padding:5px 12px;font-size:11px}
+.bxs{padding:3px 8px;font-size:10.5px;border-radius:6px}
+
+/* ── INPUTS ── */
+.ig{margin-bottom:10px}
+.il{font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);letter-spacing:.5px;margin-bottom:5px;display:block}
+input,textarea,select{width:100%;background:var(--sf2);border:1px solid var(--br2);border-radius:7px;padding:8px 12px;color:var(--tx);font-family:'DM Mono',monospace;font-size:11.5px;outline:none;transition:border-color .15s}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 2px rgba(79,127,255,.08)}
+textarea{resize:vertical;min-height:100px;line-height:1.55}
+
+/* ── JOB CARDS ── */
+.jcard{background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:13px;cursor:pointer;transition:all .15s;position:relative;margin-bottom:8px}
+.jcard:hover{border-color:var(--br2);transform:translateY(-1px);box-shadow:0 3px 16px rgba(0,0,0,.3)}
+.jcard.sel{border-color:var(--ac);background:rgba(79,127,255,.04)}
+.jcard.isnew::after{content:'NEW';position:absolute;top:10px;right:10px;font-family:'DM Mono',monospace;font-size:8px;background:rgba(16,185,129,.2);color:var(--gr);border:1px solid rgba(16,185,129,.3);padding:2px 6px;border-radius:4px}
+.jh{display:flex;align-items:flex-start;gap:9px;margin-bottom:6px}
+.jt{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;line-height:1.3}
+.jsc{font-family:'DM Mono',monospace;font-size:10.5px;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.ssh{background:rgba(16,185,129,.1);color:var(--gr);border:1px solid rgba(16,185,129,.2)}
+.ssm{background:rgba(245,158,11,.1);color:var(--ye);border:1px solid rgba(245,158,11,.2)}
+.ssl{background:rgba(239,68,68,.1);color:var(--re);border:1px solid rgba(239,68,68,.2)}
+.jm{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2)}
+.jd{font-size:11.5px;color:var(--tx2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.jac{display:flex;align-items:center;gap:7px;margin-top:7px}
+.jln{font-family:'DM Mono',monospace;font-size:10px;color:var(--ac);text-decoration:none}
+.jln:hover{text-decoration:underline}
+
+/* ── FILTERS ── */
+.fbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.fc{font-family:'DM Mono',monospace;font-size:10px;padding:4px 11px;border-radius:20px;background:var(--sf2);border:1px solid var(--br);color:var(--tx2);cursor:pointer;transition:all .15s;user-select:none}
+.fc:hover,.fc.a{border-color:var(--ac);color:var(--ac);background:rgba(79,127,255,.07)}
+.sw{position:relative;flex:1;max-width:200px}
+.sw input{padding-left:30px;padding-top:5px;padding-bottom:5px}
+.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:11px;pointer-events:none}
+
+/* ── DETAIL PANEL ── */
+.dp{background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:16px;position:sticky;top:0;max-height:calc(100vh - 90px);overflow-y:auto}
+.ring{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin:0 auto 9px;border:3px solid}
+.rg{border-color:var(--gr);background:rgba(16,185,129,.08);color:var(--gr)}
+.rm{border-color:var(--ye);background:rgba(245,158,11,.08);color:var(--ye)}
+.rb{border-color:var(--re);background:rgba(239,68,68,.08);color:var(--re)}
+
+/* ── AI OUTPUT ── */
+.aio{background:var(--bg);border:1px solid var(--br);border-radius:7px;padding:10px;font-size:12px;line-height:1.7;color:var(--tx2);white-space:pre-wrap;min-height:44px}
+.aio.ld::after{content:'▊';animation:blink .7s infinite;color:var(--ac)}
+.aio.em{color:var(--tx3);font-style:italic}
+.aio.er{color:var(--re)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.at{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin:10px 0 5px}
+
+/* ── NOTICES ── */
+.notif{padding:9px 13px;border-radius:7px;font-size:12px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.ni2{background:rgba(79,127,255,.07);border:1px solid rgba(79,127,255,.15);color:#93b4ff}
+.nw{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);color:#fcd34d}
+.ng{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);color:#6ee7b7}
+
+/* ── INTEGRATION CARDS ── */
+.icard{background:var(--sf2);border:1px solid var(--br);border-radius:10px;padding:16px;margin-bottom:10px}
+.ichead{display:flex;align-items:center;gap:12px;margin-bottom:0}
+.icico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.icname{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.icsub{font-size:11.5px;color:var(--tx2);margin-top:1px}
+.icbadge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:auto}
+.ib-on{background:rgba(16,185,129,.12);color:var(--gr);border:1px solid rgba(16,185,129,.25)}
+.ib-off{background:rgba(61,68,96,.2);color:var(--tx3);border:1px solid var(--br)}
+.ib-warn{background:rgba(245,158,11,.12);color:var(--ye);border:1px solid rgba(245,158,11,.25)}
+.icbody{margin-top:12px;padding-top:12px;border-top:1px solid var(--br)}
+.icactions{display:flex;align-items:center;gap:8px;margin-top:10px}
+.icres{font-family:'DM Mono',monospace;font-size:11px}
+
+/* ── CROW ── */
+.crow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--br);font-size:12.5px}
+.crow:last-child{border-bottom:none}
+.cnum{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:30px 0;color:var(--tx3)}
+.empty .ei{font-size:26px;margin-bottom:9px;opacity:.5}
+.empty p{font-size:12px;line-height:1.7}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--br2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sb">
+  <div class="logo">
+    <div class="logo-ico">⬡</div>
+    <div><div class="logo-n">UpFlow</div><div class="logo-s">UPWORK INTELLIGENCE</div></div>
+  </div>
+
+  <div class="ns">Main</div>
+  <div class="ni a" onclick="nav('dash')"><span class="ic">⬡</span> Dashboard</div>
+  <div class="ni" onclick="nav('jobs')"><span class="ic">◈</span> Job Feed <span class="nbadge" id="nbadge" style="display:none">0</span></div>
+
+  <div class="ns">Tools</div>
+  <div class="ni" onclick="nav('analyzer')"><span class="ic">◎</span> Client Analyzer</div>
+  <div class="ni" onclick="nav('letters')"><span class="ic">✦</span> Cover Letter AI</div>
+
+  <div class="ns">Account</div>
+  <div class="ni" onclick="nav('integrations')"><span class="ic">⊹</span> Integrations</div>
+
+  <div class="sbfoot">
+    <div class="sv" onclick="nav('integrations')">
+      <div class="svd" id="dot-c"></div><span class="svl">Claude AI</span><span class="svt off" id="tag-c">—</span>
+    </div>
+    <div class="sv" onclick="nav('integrations')">
+      <div class="svd" id="dot-t"></div><span class="svl">Telegram</span><span class="svt off" id="tag-t">—</span>
+    </div>
+    <div class="sv" onclick="nav('integrations')">
+      <div class="svd" id="dot-u"></div><span class="svl">Upwork API</span><span class="svt off" id="tag-u">—</span>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--tx3);margin-top:3px" id="updLbl">—</div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="tb-title" id="pagetitle">Dashboard</div>
+    <div class="rfbtn" onclick="refreshAll()" id="rfBtn"><span class="ri">↻</span> Refresh</div>
+    <div class="tb-pill" id="topPill">UpFlow</div>
+  </div>
+
+  <div class="pages">
+
+    <!-- ════ DASHBOARD ════ -->
+    <div class="page act" id="page-dash">
+      <div class="g4">
+        <div class="sc">
+          <div class="sl">Job Success Score</div>
+          <div class="sv2 e" id="d-jss">—</div>
+          <div class="ss" id="d-jss-s">Awaiting Upwork API</div>
+          <div class="pb"><div class="pf" id="d-jss-b" style="width:0"></div></div>
+        </div>
+        <div class="sc">
+          <div class="sl">Total Earned</div>
+          <div class="sv2 e" id="d-earned">—</div>
+          <div class="ss" id="d-jobs">Awaiting Upwork API</div>
+        </div>
+        <div class="sc">
+          <div class="sl">Avg Hourly Rate</div>
+          <div class="sv2 e" id="d-rate">—</div>
+          <div class="ss">Hourly contracts avg</div>
+        </div>
+        <div class="sc">
+          <div class="sl">Connects Available</div>
+          <div class="sv2 e" id="d-conn">—</div>
+          <div class="ss">~<span id="d-props">—</span> proposals possible</div>
+        </div>
+      </div>
+
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="ctit">Profile Score Analysis</div>
+          <div class="ptabs">
+            <div class="ptab a" onclick="switchP(this,'main')">Main Profile</div>
+            <div class="ptab" onclick="switchP(this,'seo')">SEO Specialized</div>
+          </div>
+          <div id="profScores"></div>
+        </div>
+        <div class="card">
+          <div class="ctit">Connects Analytics</div>
+          <div id="connData">
+            <div class="empty" style="padding:18px 0"><div class="ei">◈</div><p>Will populate when<br>Upwork API is connected</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="ctit" style="margin-bottom:0">Contracts</div>
+          <div class="tabs">
+            <div class="tab a" onclick="switchCT(this,'active')">Active (<span id="aCount">—</span>)</div>
+            <div class="tab" onclick="switchCT(this,'completed')">Completed (<span id="cCount">—</span>)</div>
+          </div>
+        </div>
+        <div id="ctTable">
+          <div class="empty" style="padding:22px 0">
+            <div class="ei">◈</div>
+            <p>Awaiting Upwork API connection<br><span style="font-size:11px;opacity:.6">Add credentials in Integrations → Redeploy on Vercel</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ JOB FEED ════ -->
+    <div class="page" id="page-jobs">
+      <div class="notif ni2" style="margin-bottom:12px">
+        <span>◈</span><span>Live Upwork RSS — <span id="jobInfo">loading...</span>. Jobs scoring <strong>95%+</strong> trigger Telegram push.</span>
+      </div>
+      <div class="fbar">
+        <div class="sw"><span class="si">🔍</span><input placeholder="Search..." id="jsearch" oninput="renderJobs()"></div>
+        <div class="fc a" onclick="ftag(this,'all')">All</div>
+        <div class="fc" onclick="ftag(this,'seo_geo')">SEO & GEO</div>
+        <div class="fc" onclick="ftag(this,'ads')">Ads</div>
+        <div class="fc" onclick="ftag(this,'dev')">Development</div>
+        <div class="fc" onclick="ftag(this,'analytics')">Analytics & GTM</div>
+        <select id="minscore" onchange="renderJobs()" style="width:auto;padding:4px 10px;font-size:10px;margin-left:auto">
+          <option value="0">All scores</option><option value="70">70%+</option>
+          <option value="80">80%+</option><option value="90">90%+</option><option value="95">95%+ 🔥</option>
+        </select>
+      </div>
+      <div class="g2" style="gap:16px;align-items:start">
+        <div id="jobList"><div class="empty"><div class="ei">◈</div><p>Loading...</p></div></div>
+        <div class="dp" id="jobDetail"><div class="empty"><div class="ei">◈</div><p>Select a job</p></div></div>
+      </div>
+    </div>
+
+    <!-- ════ ANALYZER ════ -->
+    <div class="page" id="page-analyzer">
+      <div class="g2" style="gap:16px;align-items:start">
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="ctit">Analyze Job / Client</div>
+            <div class="notif nw" style="margin-bottom:9px"><span>⚠️</span><span>On Upwork job page: <strong>Ctrl+A → Ctrl+C → paste below</strong></span></div>
+            <div class="ig"><label class="il">Job URL (optional)</label><input id="aUrl" placeholder="https://www.upwork.com/jobs/~01..."></div>
+            <div class="ig"><label class="il">Paste full job page text</label>
+              <textarea id="aText" style="min-height:160px" placeholder="Paste entire page — title, description, Payment verified ✓, Hire rate: 68%, Total spent: $12,450..."></textarea>
+            </div>
+            <button class="btn bp" onclick="doAnalyze()">⬡ Full AI Analysis</button>
+          </div>
+        </div>
+        <div class="card" style="min-height:360px">
+          <div class="ctit">Analysis Result</div>
+          <div class="empty" id="aEmpty"><div class="ei">◎</div><p>Paste job data and run analysis</p></div>
+          <div id="aOut" style="display:none">
+            <div style="text-align:center;margin-bottom:12px">
+              <div class="ring" id="cRing">—</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px" id="cVerdict"></div>
+              <div style="font-size:11px;color:var(--tx2);margin-top:2px" id="cSub"></div>
+              <div id="aLinkW" style="margin-top:4px"></div>
+            </div>
+            <div id="cSigs" style="margin-bottom:9px"></div>
+            <div class="div"></div>
+            <div class="at">📋 Summary</div><div class="aio em" id="aiS">—</div>
+            <div class="at">👤 Client Profile</div><div class="aio em" id="aiC">—</div>
+            <div class="at">🎯 Match Score</div><div class="aio em" id="aiM">—</div>
+            <div class="at">⚡ Verdict & Bid</div><div class="aio em" id="aiV">—</div>
+            <div style="display:flex;gap:7px;margin-top:10px">
+              <button class="btn bp bsm" onclick="toLetter()">✦ Cover Letter</button>
+              <button class="btn bs bsm" onclick="copyA()">Copy All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ COVER LETTER ════ -->
+    <div class="page" id="page-letters">
+      <div class="g2" style="gap:16px;align-items:start">
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="ctit">Job Input</div>
+            <div class="ig"><label class="il">Paste job posting</label>
+              <textarea id="lJob" style="min-height:130px" placeholder="Paste job description..."></textarea>
+            </div>
+            <div class="g2" style="gap:9px;margin-bottom:10px">
+              <div class="ig" style="margin-bottom:0"><label class="il">Tone</label>
+                <select id="lTone">
+                  <option value="professional">Professional & Data-driven</option>
+                  <option value="conversational">Conversational & Warm</option>
+                  <option value="direct">Direct & Confident</option>
+                  <option value="technical">Technical Expert</option>
+                </select>
+              </div>
+              <div class="ig" style="margin-bottom:0"><label class="il">Focus Area</label>
+                <select id="lFocus">
+                  <option value="technical">Technical SEO</option>
+                  <option value="local">Local SEO</option>
+                  <option value="geo">GEO / AI Search</option>
+                  <option value="ecom">E-commerce SEO</option>
+                  <option value="saas">SaaS SEO</option>
+                  <option value="audit">SEO Audit</option>
+                  <option value="ads">Google / Meta Ads</option>
+                  <option value="analytics">GA4 & Tracking</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn bp" onclick="genLetter()">✦ Generate Cover Letter</button>
+          </div>
+          <div class="card">
+            <div class="ctit">Profile Context</div>
+            <div style="font-size:12px;color:var(--tx2);line-height:1.9">
+              <div>👤 <strong style="color:var(--tx)">Maksym Kotsupyra</strong> — SEO & GEO Specialist</div>
+              <div>⭐ 10 jobs · 419h · $7K+ earned</div>
+              <div>🏢 Komodor DevOps SaaS — GEO Lead</div>
+              <div>🏥 Aesthete Med Spa — <strong style="color:var(--gr)">845% Google Ads ROI</strong></div>
+              <div>💊 Pharmacy ecom — <strong style="color:var(--gr)">+290% organic</strong></div>
+              <div>🔧 Ahrefs · Screaming Frog · GA4 · GTM · Looker Studio</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div class="ctit" style="margin-bottom:0">Generated Letter</div>
+            <button class="btn bs bsm" onclick="copyL()" id="cpyL" style="display:none">Copy</button>
+          </div>
+          <div class="aio em" id="lOut">Cover letter will appear here...</div>
+          <div style="margin-top:7px;display:none" id="regenW">
+            <button class="btn bs bsm" onclick="genLetter()">↻ Regenerate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ INTEGRATIONS ════ -->
+    <div class="page" id="page-integrations">
+      <div style="max-width:540px">
+        <div style="margin-bottom:16px">
+          <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:4px">Integrations</div>
+          <div style="font-size:12.5px;color:var(--tx2);line-height:1.7">Keys are stored as <strong style="color:var(--tx)">Vercel Environment Variables</strong>.<br>Add them in Vercel → Settings → Environment Variables → Redeploy.</div>
+        </div>
+
+        <!-- CLAUDE -->
+        <div class="icard">
+          <div class="ichead">
+            <div class="icico" style="background:rgba(99,102,241,.12);color:#818cf8">✦</div>
+            <div style="flex:1"><div class="icname">Claude AI</div><div class="icsub">Cover letters, client analysis, job scoring</div></div>
+            <div class="icbadge ib-off" id="ib-c">○ Not set</div>
+          </div>
+          <div class="icbody">
+            <div style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--tx2);margin-bottom:8px">
+              Env var: <code style="color:var(--ac);background:var(--sf);padding:1px 6px;border-radius:3px">CLAUDE_KEY</code>
+            </div>
+            <div class="icactions">
+              <button class="btn bs bsm" onclick="testSvc('c')">Test connection</button>
+              <span class="icres" id="res-c"></span>
+            </div>
+            <div style="font-size:11px;color:var(--tx3);margin-top:8px">
+              Get key: <a href="https://console.anthropic.com/api-keys" target="_blank" style="color:var(--ac);text-decoration:none">console.anthropic.com/api-keys</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- TELEGRAM -->
+        <div class="icard">
+          <div class="ichead">
+            <div class="icico" style="background:rgba(14,165,233,.1);color:#38bdf8">✈</div>
+            <div style="flex:1"><div class="icname">Telegram Bot</div><div class="icsub">Push alerts for 95%+ matching jobs</div></div>
+            <div class="icbadge ib-off" id="ib-t">○ Not set</div>
+          </div>
+          <div class="icbody">
+            <div style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--tx2);margin-bottom:8px">
+              Env vars: <code style="color:var(--ac);background:var(--sf);padding:1px 6px;border-radius:3px">TG_TOKEN</code> + <code style="color:var(--ac);background:var(--sf);padding:1px 6px;border-radius:3px">TG_CHAT_ID</code>
+            </div>
+            <div class="icactions">
+              <button class="btn bs bsm" onclick="testSvc('t')">Send test message</button>
+              <span class="icres" id="res-t"></span>
+            </div>
+            <div style="font-size:11px;color:var(--tx3);margin-top:8px">
+              Chat ID: message bot → <code style="font-size:10px">api.telegram.org/bot{TOKEN}/getUpdates</code> or @userinfobot
+            </div>
+          </div>
+        </div>
+
+        <!-- UPWORK -->
+        <div class="icard">
+          <div class="ichead">
+            <div class="icico" style="background:rgba(20,184,166,.1);color:#2dd4bf">⬡</div>
+            <div style="flex:1"><div class="icname">Upwork API</div><div class="icsub">Live JSS, contracts, earnings, profile</div></div>
+            <div class="icbadge ib-warn" id="ib-u">◌ Pending</div>
+          </div>
+          <div class="icbody">
+            <div class="notif nw" style="margin-bottom:10px;font-size:11.5px">
+              <span>⏳</span><span>Key created (ID: <code style="font-family:'DM Mono',monospace;font-size:10px">13be829e…</code>) — awaiting Upwork approval (1–5 days). You'll get an email.</span>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--tx2);margin-bottom:8px">
+              Env vars: <code style="color:var(--ac);background:var(--sf);padding:1px 6px;border-radius:3px">UPWORK_CLIENT_ID</code> + <code style="color:var(--ac);background:var(--sf);padding:1px 6px;border-radius:3px">UPWORK_SECRET</code>
+            </div>
+            <div class="icactions">
+              <button class="btn bs bsm" onclick="testSvc('u')">Check status</button>
+              <span class="icres" id="res-u"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RSS (always on) -->
+        <div class="icard" style="display:flex;align-items:center;gap:12px">
+          <div class="icico" style="background:rgba(249,115,22,.1);color:#fb923c">◈</div>
+          <div style="flex:1"><div class="icname">Upwork RSS Feed</div><div class="icsub">14 live queries — always active, no auth</div></div>
+          <div class="icbadge ib-on">● Always active</div>
+        </div>
+
+        <!-- HOW TO -->
+        <div class="card" style="margin-top:10px">
+          <div class="ctit">How to add / update keys</div>
+          <div style="font-size:12.5px;color:var(--tx2);line-height:2.1;counter-reset:step">
+            <div>1. Open <a href="https://vercel.com" target="_blank" style="color:var(--ac);text-decoration:none">vercel.com</a> → your project <strong style="color:var(--tx)">upflow-woad</strong></div>
+            <div>2. <strong style="color:var(--tx)">Settings</strong> → <strong style="color:var(--tx)">Environment Variables</strong></div>
+            <div>3. Add or edit the variable → <strong style="color:var(--tx)">Save</strong></div>
+            <div>4. <strong style="color:var(--tx)">Deployments</strong> → three-dot menu → <strong style="color:var(--tx)">Redeploy</strong></div>
+          </div>
+        </div>
+
+        <!-- ALERT THRESHOLD -->
+        <div class="card" style="margin-top:10px">
+          <div class="ctit">Telegram Alert Threshold</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
+            <div style="flex:1;font-size:12.5px;color:var(--tx2)">Push when job match score ≥</div>
+            <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--ac)" id="alertV">95%</div>
+          </div>
+          <input type="range" min="70" max="99" value="95" id="alertR" oninput="alertChange(this.value)" style="width:100%;padding:0;background:transparent;border:none;cursor:pointer;accent-color:var(--ac)">
+          <div style="font-size:11px;color:var(--tx3);margin-top:5px">Make permanent: set <code style="font-family:'DM Mono',monospace;font-size:10px">SCORE_ALERT=<span id="alertN">95</span></code> in Vercel env vars</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+</main>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const S = {
+  page:'dash', jobs:[], filter:'all', selJob:null,
+  pTab:'main', ctTab:'active', lastText:'', upData:null,
+};
+
+// ═══════════════════════════════════════════
+// PROFILE SCORES (static analysis of profile quality)
+// ═══════════════════════════════════════════
+const PS = {
+  main:[
+    {l:'Headline (SEO focus)',v:6,c:'#f59e0b'},
+    {l:'Overview (first 2 lines)',v:7,c:'#4f7fff'},
+    {l:'Portfolio quality',v:9,c:'#10b981'},
+    {l:'Hourly rate',v:5,c:'#ef4444'},
+    {l:'Video Introduction',v:0,c:'#ef4444'},
+    {l:'Certifications',v:8,c:'#10b981'},
+    {l:'Skills relevance',v:7,c:'#4f7fff'},
+    {l:'JSS score',v:8,c:'#f59e0b'},
+  ],
+  seo:[
+    {l:'Headline (SEO & GEO)',v:8,c:'#10b981'},
+    {l:'Overview structure',v:8,c:'#10b981'},
+    {l:'Niche clarity',v:9,c:'#10b981'},
+    {l:'Hourly rate',v:3,c:'#ef4444'},
+    {l:'Video Introduction',v:0,c:'#ef4444'},
+    {l:'Portfolio items',v:8,c:'#10b981'},
+    {l:'Specialization signal',v:9,c:'#10b981'},
+    {l:'Keyword density',v:6,c:'#f59e0b'},
+  ],
+};
+
+function switchP(el,k){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('a'));
+  el.classList.add('a'); S.pTab=k; renderPS();
+}
+function renderPS(){
+  const sc=PS[S.pTab];
+  const tot=Math.round(sc.reduce((a,r)=>a+r.v,0)/sc.length*10);
+  const col=tot>=70?'var(--gr)':tot>=50?'var(--ye)':'var(--re)';
+  document.getElementById('profScores').innerHTML=
+    `<div style="margin-bottom:9px;display:flex;align-items:baseline;gap:7px">
+      <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${col}">${tot}/100</span>
+      <span style="font-size:11px;color:var(--tx2)">${S.pTab==='main'?'Main Profile':'SEO Specialized'}</span>
+    </div>`+
+    sc.map(s=>`<div class="srow">
+      <div class="srl">${s.l}</div>
+      <div class="srb"><div class="srf" style="width:${s.v*10}%;background:${s.c}"></div></div>
+      <div class="srv" style="color:${s.c}">${s.v}/10</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// CONTRACTS TABLE
+// ═══════════════════════════════════════════
+function switchCT(el,tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('a'));
+  el.classList.add('a'); S.ctTab=tab; renderCT();
+}
+function renderCT(){
+  const p=S.upData;
+  if(!p?.contracts){
+    document.getElementById('ctTable').innerHTML=
+      '<div class="empty" style="padding:22px 0"><div class="ei">◈</div><p>Awaiting Upwork API connection</p></div>';
+    return;
+  }
+  const data=p.contracts[S.ctTab]||[], isA=S.ctTab==='active';
+  document.getElementById('aCount').textContent=p.contracts.active?.length??'—';
+  document.getElementById('cCount').textContent=p.contracts.completed?.length??'—';
+  if(!data.length){
+    document.getElementById('ctTable').innerHTML='<div class="empty" style="padding:16px 0"><p>No contracts</p></div>';
+    return;
+  }
+  document.getElementById('ctTable').innerHTML=
+    `<table class="tbl"><thead><tr>
+      <th></th><th>Contract</th><th>Client</th><th>Rate</th><th>Hrs</th><th>Earned</th>
+      ${isA?'':'<th>Review</th>'}<th>Period</th>
+    </tr></thead><tbody>`+
+    data.map(c=>`<tr>
+      <td><span class="${isA?'don':'doff'}"></span></td>
+      <td style="font-weight:500;max-width:180px">${c.title||'—'}</td>
+      <td style="color:var(--tx2);font-size:11px">${c.client||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--ac)">${c.fixed?'Fixed':c.rate?'$'+c.rate+'/hr':'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10.5px">${c.hours?c.hours+'h':'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--gr)">${c.earned?'$'+Number(c.earned).toLocaleString():'—'}</td>
+      ${isA?'':c.rating!=null?`<td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span class="stars">${'★'.repeat(Math.floor(c.rating))}${'☆'.repeat(5-Math.floor(c.rating))}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:${c.rating>=4.5?'var(--gr)':c.rating>=3.5?'var(--ye)':'var(--re)'}">${Number(c.rating).toFixed(1)}</span>
+        </div>
+      </td>`:'<td style="color:var(--tx3)">—</td>'}
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2)">${c.since||'—'}${c.ended?' → '+c.ended:isA?' → now':''}</td>
+    </tr>`).join('')+
+    '</tbody></table>';
+}
+
+// ═══════════════════════════════════════════
+// LOAD PROFILE (live API only)
+// ═══════════════════════════════════════════
+async function loadProfile(){
+  try{
+    const r=await fetch('/api/profile'), d=await r.json();
+    if(d.source==='live'&&d.data){
+      S.upData=d.data;
+      const p=d.data;
+      if(p.jss!=null){
+        const jss=Math.round(p.jss*100);
+        set('d-jss',jss+'%',false);
+        document.getElementById('d-jss-b').style.width=jss+'%';
+        document.getElementById('d-jss-s').textContent='Live from Upwork';
+        document.getElementById('topPill').textContent=(p.name||'').split(' ')[0]+' · JSS '+jss+'%';
+      }
+      if(p.totalEarned!=null) set('d-earned','$'+Number(p.totalEarned).toLocaleString(),false);
+      if(p.totalJobs||p.totalHours) document.getElementById('d-jobs').textContent=(p.totalJobs||'?')+' jobs · '+(p.totalHours||'?')+'h';
+      if(p.connects!=null){
+        set('d-conn',p.connects,false);
+        document.getElementById('d-props').textContent=Math.floor(p.connects/6);
+        renderConnects(p);
+      }
+      const hr=[...(p.contracts?.active||[]),...(p.contracts?.completed||[])].filter(c=>c.rate);
+      if(hr.length) set('d-rate','$'+Math.round(hr.reduce((a,c)=>a+c.rate,0)/hr.length)+'/hr',false);
+      renderCT();
+    }
+  }catch(e){ /* leave empty */ }
+}
+
+function set(id,val,empty=true){
+  const el=document.getElementById(id);
+  el.textContent=val;
+  if(!empty) el.className='sv2';
+}
+
+function renderConnects(p){
+  if(p.connects==null) return;
+  const props=Math.floor(p.connects/6);
+  document.getElementById('connData').innerHTML=
+    `<div class="crow"><span style="color:var(--tx2)">Available connects</span><span class="cnum" style="color:var(--ac)">${p.connects}</span></div>
+     <div class="crow"><span style="color:var(--tx2)">Cost per proposal</span><span class="cnum">6 connects</span></div>
+     <div class="crow"><span style="color:var(--tx2)">Proposals possible</span><span class="cnum" style="color:var(--gr)">~${props}</span></div>
+     ${p.totalJobs?`<div class="crow"><span style="color:var(--tx2)">Total hires</span><span class="cnum">${p.totalJobs}</span></div>`:''}`;
+}
+
+// ═══════════════════════════════════════════
+// CONFIG STATUS
+// ═══════════════════════════════════════════
+async function loadConfig(){
+  try{
+    const r=await fetch('/api/config'), d=await r.json();
+    setDot('c', d.claude,     false);
+    setDot('t', d.tg,         false);
+    setDot('u', d.upwork,     true);   // upwork = pending until approved
+  }catch(e){}
+}
+
+function setDot(k, on, pending){
+  const dot=document.getElementById('dot-'+k);
+  const tag=document.getElementById('tag-'+k);
+  const badge=document.getElementById('ib-'+k);
+  dot.className='svd '+(on?'on':pending?'warn':'');
+  tag.className='svt '+(on?'on':pending?'warn':'off');
+  tag.textContent=on?'live':pending?'pending':'—';
+  if(badge){
+    badge.className='icbadge '+(on?'ib-on':pending?'ib-warn':'ib-off');
+    badge.textContent=on?'● Connected':pending?'◌ Pending':'○ Not set';
+  }
+}
+
+// ═══════════════════════════════════════════
+// TEST SERVICES
+// ═══════════════════════════════════════════
+async function testSvc(k){
+  const map={c:'test_claude',t:'test_telegram',u:'test_upwork'};
+  const el=document.getElementById('res-'+k);
+  el.textContent='⏳'; el.style.color='var(--tx3)';
+  try{
+    const r=await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:map[k]})});
+    const d=await r.json();
+    el.textContent=d.ok?'✅ '+(d.model||d.note||'OK'):'❌ '+(d.error||'Failed');
+    el.style.color=d.ok?'var(--gr)':'var(--re)';
+    if(d.ok) loadConfig();
+  }catch(e){ el.textContent='❌ '+e.message; el.style.color='var(--re)'; }
+  setTimeout(()=>el.textContent='',8000);
+}
+
+// ═══════════════════════════════════════════
+// JOB FEED
+// ═══════════════════════════════════════════
+async function fetchJobs(){
+  document.getElementById('jobList').innerHTML='<div class="empty"><div class="ei">◈</div><p>Fetching from Upwork...</p></div>';
+  try{
+    const r=await fetch('/api/jobs?ai=true'), d=await r.json();
+    S.jobs=d.jobs||[];
+    const nb=document.getElementById('nbadge');
+    if(S.jobs.length){nb.style.display='inline';nb.textContent=S.jobs.length;}else nb.style.display='none';
+    document.getElementById('jobInfo').textContent=`${d.total} jobs${d.aiEnabled?' · AI-scored ✨':''}`;
+    if(d.lastRefresh) document.getElementById('updLbl').textContent='Updated '+new Date(d.lastRefresh).toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'});
+    renderJobs();
+  }catch(e){
+    document.getElementById('jobList').innerHTML=`<div class="notif nw"><span>⚠️</span><span>${e.message}</span></div>`;
+  }
+}
+
+function renderJobs(){
+  const q=(document.getElementById('jsearch')?.value||'').toLowerCase();
+  const ms=parseInt(document.getElementById('minscore')?.value||'0');
+  const items=S.jobs.filter(j=>
+    (S.filter==='all'||j.cat===S.filter)&&
+    (!q||j.title.toLowerCase().includes(q)||j.desc.toLowerCase().includes(q))&&
+    j.score>=ms
+  );
+  if(!items.length){document.getElementById('jobList').innerHTML='<div class="empty"><div class="ei">◈</div><p>No jobs match</p></div>';return;}
+  document.getElementById('jobList').innerHTML=items.map(j=>{
+    const sc=j.score>=80?'ssh':j.score>=60?'ssm':'ssl';
+    const vt=j.verdict?`<span style="font-family:'DM Mono',monospace;font-size:9px;padding:1px 6px;border-radius:4px;color:${j.verdict==='Apply'?'var(--gr)':j.verdict==='Skip'?'var(--re)':'var(--ye)'};border:1px solid currentColor">${j.verdict}</span>`:'';
+    return `<div class="jcard ${S.selJob===j.id?'sel':''} ${j.isNew?'isnew':''}" onclick="selJob('${j.id}')">
+      <div class="jh"><div class="jt">${j.title}</div><div class="jsc ${sc}">${j.score}%</div></div>
+      <div class="jm"><span>💰 ${j.budget||'—'}</span><span>🕐 ${j.posted}</span>
+        <span style="background:rgba(79,127,255,.07);padding:1px 7px;border-radius:10px;color:var(--ac);border:1px solid rgba(79,127,255,.13)">${j.catLabel}</span>
+        ${vt}
+      </div>
+      <div class="jd">${j.desc}</div>
+      <div class="jac">
+        <a class="jln" href="${j.url}" target="_blank" onclick="event.stopPropagation()">↗ Upwork</a>
+        <button class="btn bs bxs" onclick="event.stopPropagation();j2a('${j.id}')">◎ Analyze</button>
+        <button class="btn bs bxs" onclick="event.stopPropagation();j2l('${j.id}')">✦ Letter</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function ftag(el,tag){document.querySelectorAll('.fc').forEach(c=>c.classList.remove('a'));el.classList.add('a');S.filter=tag;if(S.page==='jobs')renderJobs();}
+function selJob(id){S.selJob=id;const j=S.jobs.find(x=>x.id===id);renderJobs();if(j)renderDetail(j);}
+
+function renderDetail(j){
+  const sc=j.score>=80?'rg':j.score>=60?'rm':'rb',rc=j.score>=80?'var(--gr)':j.score>=60?'var(--ye)':'var(--re)';
+  document.getElementById('jobDetail').innerHTML=
+    `<div style="text-align:center;margin-bottom:11px">
+      <div class="ring ${sc}">${j.score}</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:${rc}">${j.score>=80?'✅ Apply':j.score>=60?'⚠️ Caution':'❌ Skip'}</div>
+      <a href="${j.url}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ac);text-decoration:none;display:inline-block;margin-top:3px">↗ Open on Upwork</a>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;margin-bottom:7px;line-height:1.4">${j.title}</div>
+    ${j.aiReason?`<div style="background:rgba(79,127,255,.07);border:1px solid rgba(79,127,255,.14);border-radius:7px;padding:8px;font-size:11px;color:var(--tx2);font-style:italic;margin-bottom:9px">"${j.aiReason}"</div>`:''}
+    <div style="font-size:11.5px;color:var(--tx2);line-height:1.55;margin-bottom:9px">${j.desc}</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--tx2);margin-bottom:10px">💰 ${j.budget} · 📁 ${j.catLabel} · 🕐 ${j.posted}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <button class="btn bp bsm" onclick="j2l('${j.id}')">✦ Cover Letter</button>
+      <button class="btn bs bsm" onclick="j2a('${j.id}')">◎ Deep Analyze</button>
+    </div>`;
+}
+
+function j2a(id){const j=S.jobs.find(x=>x.id===id);if(!j)return;nav('analyzer');document.getElementById('aUrl').value=j.url;document.getElementById('aText').value=`Job Title: ${j.title}\n\nDescription:\n${j.desc}\n\nBudget: ${j.budget}\nPosted: ${j.posted}`;setTimeout(doAnalyze,200);}
+function j2l(id){const j=S.jobs.find(x=>x.id===id);if(!j)return;document.getElementById('lJob').value=`${j.title}\n\n${j.desc}\n\nBudget: ${j.budget} | ${j.catLabel}`;const fm={seo_geo:'technical',ads:'ads',analytics:'analytics',dev:'technical'};document.getElementById('lFocus').value=fm[j.cat]||'technical';nav('letters');setTimeout(genLetter,300);}
+
+// ═══════════════════════════════════════════
+// CLAUDE CALL
+// ═══════════════════════════════════════════
+async function callClaude(prompt,sys=''){
+  try{
+    const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}],system:sys})});
+    const d=await r.json();
+    if(d.error)return '❌ '+(typeof d.error==='object'?d.error.message:d.error);
+    return d.content?.[0]?.text||'No response.';
+  }catch(e){return '❌ '+e.message;}
+}
+
+// ═══════════════════════════════════════════
+// ANALYZER
+// ═══════════════════════════════════════════
+async function doAnalyze(){
+  const input=document.getElementById('aText').value.trim(),url=document.getElementById('aUrl').value.trim();
+  if(!input){alert('Paste job page text first.');return;}
+  S.lastText=input;
+  document.getElementById('aEmpty').style.display='none';
+  document.getElementById('aOut').style.display='block';
+
+  let score=40;
+  if(/payment verified|✓/i.test(input))score+=25;
+  if(/hire rate[:\s]+([7-9]\d|100)%/i.test(input))score+=15;
+  else if(/hire rate[:\s]+[4-6]\d%/i.test(input))score+=8;
+  if(/\$[1-9]\d{4}/.test(input))score+=10;
+  if(/4\.[89]|5\.0/.test(input))score+=10;
+  if(/no reviews|0 jobs/i.test(input))score-=20;
+  score=Math.max(5,Math.min(99,score));
+
+  const ring=document.getElementById('cRing');
+  ring.textContent=score;ring.className='ring '+(score>=70?'rg':score>=45?'rm':'rb');
+  document.getElementById('cVerdict').textContent=score>=75?'✅ Good client — Apply':score>=50?'⚠️ Proceed carefully':'❌ High risk — Skip';
+  document.getElementById('cSub').textContent='Signal-based pre-score';
+  document.getElementById('aLinkW').innerHTML=url?`<a href="${url}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ac);text-decoration:none">↗ View on Upwork</a>`:'';
+
+  const pvYes=/payment verified|✓/i.test(input);
+  const hrM=input.match(/hire rate[:\s]+([\d]+%)/i);
+  const rvM=input.match(/(\d\.\d)\s*(?:★|star)/i);
+  document.getElementById('cSigs').innerHTML=
+    [{i:pvYes?'✅':'❌',t:'Payment Verified',v:pvYes?'Yes':'Not found',c:pvYes?'var(--gr)':'var(--re)'},
+     {i:'📊',t:'Hire Rate',v:hrM?hrM[1]:'Not found',c:'var(--ye)'},
+     {i:'⭐',t:'Client Rating',v:rvM?rvM[1]+' ★':'Not found',c:'var(--gr)'}]
+    .map(s=>`<div style="display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--br)">
+      <span style="font-size:12px;width:17px;text-align:center">${s.i}</span>
+      <span style="flex:1;font-size:11.5px;color:var(--tx2)">${s.t}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10.5px;color:${s.c}">${s.v}</span>
+    </div>`).join('');
+
+  ['aiS','aiC','aiM','aiV'].forEach(id=>{
+    const el=document.getElementById(id);el.textContent='';el.className='aio ld';
+  });
+
+  const sys=`Upwork proposal expert for Maksym Kotsupyra, SEO & GEO Specialist, Lviv Ukraine. $7K+ earned. Key results: Komodor SaaS GEO Lead, Aesthete Med Spa (845% ROI), pharmacy ecom (+290% organic), Pro:Care Chiropractic. Tools: Ahrefs, Screaming Frog, GA4, GTM, Focala, Looker Studio. Be specific and concise.`;
+
+  const [sum,cli,match,flags]=await Promise.all([
+    callClaude(`Summarize this Upwork job in 3-4 sentences. What exactly do they need?\n\n${input}`,sys),
+    callClaude(`Analyze the CLIENT: business type, hiring experience, red flags or green flags.\n\n${input}`,sys),
+    callClaude(`Rate Maksym's match 0-100% for this job. Be specific, reference his actual portfolio.\n\n${input}`,sys),
+    callClaude(`List any red flags. Give final verdict: Apply / Caution / Skip + suggested bid price.\n\n${input}`,sys),
+  ]);
+
+  [['aiS',sum],['aiC',cli],['aiM',match],['aiV',flags]].forEach(([id,t])=>{
+    const el=document.getElementById(id);
+    el.className='aio'+(t.startsWith('❌')?' er':'');
+    el.textContent=t;
+  });
+}
+
+function copyA(){navigator.clipboard.writeText(['aiS','aiC','aiM','aiV'].map(id=>document.getElementById(id).textContent).join('\n\n')).catch(()=>{});}
+function toLetter(){document.getElementById('lJob').value=S.lastText;nav('letters');setTimeout(genLetter,300);}
+
+// ═══════════════════════════════════════════
+// COVER LETTER
+// ═══════════════════════════════════════════
+async function genLetter(){
+  const job=document.getElementById('lJob').value.trim();
+  if(!job){alert('Paste a job description first.');return;}
+  const tone=document.getElementById('lTone').value,focus=document.getElementById('lFocus').value;
+  const out=document.getElementById('lOut');
+  out.textContent='';out.className='aio ld';
+
+  const toneMap={
+    professional:'professional, data-driven, results-focused',
+    conversational:'conversational, warm, human-first',
+    direct:'direct, confident, zero fluff',
+    technical:'technical expert demonstrating specific tool mastery',
+  };
+  const focusMap={
+    technical:'Technical SEO audits, Core Web Vitals, crawl optimization, schema',
+    local:'Local SEO, Google Business Profile, NAP consistency, multi-location',
+    geo:'GEO & AI search visibility (ChatGPT, Perplexity, Google AI Overviews, Bing Copilot)',
+    ecom:'E-commerce SEO, Shopify/WooCommerce, category optimization, organic revenue growth',
+    saas:'SaaS SEO, B2B content architecture, pipeline-driven organic growth',
+    audit:'SEO audits with prioritized, actionable recommendations',
+    ads:'Google Ads & Meta Ads, ROAS optimization, conversion tracking',
+    analytics:'GA4 + GTM implementation, event tracking, Looker Studio dashboards',
+  };
+
+  const sys=`Write highly personalized Upwork cover letters for Maksym Kotsupyra, SEO & GEO Specialist, Lviv Ukraine.
+Background: JSS 83%, $7K+, 10 jobs, 419h. Active clients: Komodor DevOps SaaS (GEO Lead since Sep 2025), Aesthete Med Spa USA (845% Google Ads ROI), Ukrainian pharmacy ecom (+290% organic traffic), Pro:Care Chiropractic OR (3 clinics). Tools: Ahrefs, Screaming Frog, GA4, GTM, Focala, Looker Studio. Certs: Google Analytics IQ, GMB Basics, Conversion Optimization.
+Tone: ${toneMap[tone]}.
+Focus: ${focusMap[focus]}.
+Rules: 1) Open with a hook that mirrors their exact problem 2) Include 1-2 case studies with real numbers 3) Zero filler phrases (no "I am writing to apply", no "I would love to") 4) 200-250 words 5) End with ONE sharp, insight-driven question about their situation 6) Flowing prose, absolutely no bullet points.`;
+
+  const result=await callClaude(`Write a cover letter for this Upwork job:\n\n${job}`,sys);
+  out.className='aio'+(result.startsWith('❌')?' er':'');
+  out.textContent=result;
+  document.getElementById('cpyL').style.display='inline-flex';
+  document.getElementById('regenW').style.display='block';
+}
+
+function copyL(){
+  navigator.clipboard.writeText(document.getElementById('lOut').textContent).then(()=>{
+    const b=document.getElementById('cpyL');b.textContent='✓ Copied!';
+    setTimeout(()=>b.textContent='Copy',2000);
+  });
+}
+
+// ═══════════════════════════════════════════
+// ALERT RANGE
+// ═══════════════════════════════════════════
+function alertChange(v){
+  document.getElementById('alertV').textContent=v+'%';
+  document.getElementById('alertN').textContent=v;
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('a'));
+  document.getElementById('page-'+page).classList.add('act');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes(`'${page}'`))n.classList.add('a');});
+  S.page=page;
+  const T={dash:'Dashboard',jobs:'Job Feed',analyzer:'Client Analyzer',letters:'Cover Letter AI',integrations:'Integrations'};
+  document.getElementById('pagetitle').textContent=T[page]||page;
+  if(page==='jobs'&&!S.jobs.length)fetchJobs();
+}
+
+// ═══════════════════════════════════════════
+// REFRESH
+// ═══════════════════════════════════════════
+async function refreshAll(){
+  const btn=document.getElementById('rfBtn');btn.classList.add('spin');
+  await Promise.all([loadProfile(),loadConfig()]);
+  if(S.page==='jobs')await fetchJobs();
+  btn.classList.remove('spin');
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+async function init(){
+  renderPS();
+  await Promise.all([loadProfile(),loadConfig()]);
+  setInterval(loadConfig,90000); // refresh status every 90s
+}
+init();
+</script>
+</body>
+</html>
